@@ -4,6 +4,14 @@ roseate_voucher_event_handler:
     events:
         on server start:
         - run roseate_vouchers_yaml_handler
+        on player right clicks block:
+        - if <context.item.has_flag[voucher]>:
+            - define voucher_type <context.item.flag[voucher].if_null[invalid]>
+            - if <[voucher_type]> != invalid:
+                - ratelimit <player> 3s
+                - foreach <yaml[rv_voucher_<[voucher_type]>].parsed_key[<[voucher_type]>.Effects.Commands]> as:commands:
+                    - execute as_server <[commands]>
+                - take iteminhand
 
 roseate_vouchers_yaml_handler:
     debug: false
@@ -87,16 +95,3 @@ roseate_vouchers_command:
     - if <context.args.size> == 1 && <context.args.get[1]> == reload:
         - run roseate_vouchers_yaml_handler
         - narrate "<&color[#735656]><&color[l]>[<&color[#D9C69C]>🔥<&color[#735656]><&color[l]>] <&color[#D9C69C]>Voucher system reloaded!"
-
-roseate_vouchers_event_loader:
-    debug: false
-    type: world
-    events:
-        on player right clicks block:
-            - if <context.item.has_flag[voucher]>:
-                - define voucher_type <context.item.flag[voucher].if_null[invalid]>
-                - if <[voucher_type]> != invalid:
-                    - ratelimit <player> 3s
-                    - foreach <yaml[rv_voucher_<[voucher_type]>].parsed_key[<[voucher_type]>.Effects.Commands]> as:commands:
-                        - execute as_server <[commands]>
-                    - take iteminhand
